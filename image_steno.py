@@ -100,19 +100,71 @@ def encrypt_message(image_path, message, password):
     
     return new_image_path
 
+def decrypt_image(image_path, password):
+    img = Image.open(image_path)
+
+    # Convert the image to RGBA mode
+    img = img.convert("RGBA")
+
+    array = np.array(img)
+    
+    array = array.astype(np.uint8) 
+     
+    last_two_bits = np.bitwise_and(array[..., :3], 0b00000011)  # Extract last two bits of RGB channels
+
+    image_binary = last_two_bits.reshape(-1, 3)  # Reshape to (total_pixels, color_channels)
+    image_binary = ''.join(format(pixel, '02b') for pixel in image_binary.flatten())  # Convert to string
+
+    delimiter = '00111100'  # Delimiter bit pattern
+
+    delimiter_start_index = image_binary.find(delimiter)
+
+    if delimiter_start_index != -1:
+        remainder = 8 - (delimiter_start_index % 8)
+
+        if delimiter_start_index % 8 != 0:
+            delimiter_start_index += remainder
+
+        delimiter_end_index = delimiter_start_index + len(delimiter)
+
+        password_length_start = delimiter_end_index
+        password_length_end = password_length_start + 8
+        password_length_bin = image_binary[password_length_start:password_length_end]
+
+        password_length = int(password_length_bin, 2)
+
+        password_start = password_length_end
+        password_end = password_start + (password_length * 8)
+        extractedBin_password = image_binary[password_start:password_end]
+
+        extracted_password = ''.join(chr(int(extractedBin_password[i:i+8], 2)) for i in range(0, len(extractedBin_password), 8))
+
+        if extracted_password == password:
+            extracted_message = ''.join(chr(int(image_binary[i:i+8], 2)) for i in range(0, delimiter_start_index, 8))
+            return extracted_message
+        else:
+            raise Exception("Incorrect password")
+    else:
+        raise Exception("Password not found! Make sure you have uploaded the correct image")
+
 def encrypt_page():
     st.title("Image Encryption")
     
     # Placeholder image path for when no image is uploaded
     default_image_path = "path_to_default_image.png"
     
-    image_path = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
+    uploaded_image = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
     
-    # Use the uploaded image or the default image
-    if image_path is None:
+    if uploaded_image is None:
         st.image(default_image_path, caption="Default Image", use_column_width=True)
+        image_path = default_image_path
     else:
-        st.image(image_path, caption="Uploaded Image", use_column_width=True)
+        # Convert the UploadedFile to bytes and create a PIL Image
+        image = Image.open(uploaded_image)
+        st.image(image, caption="Uploaded Image", use_column_width=True)
+        # Save the uploaded image locally for use in encryption
+        image_path = "uploaded_image.png"
+        image.save(image_path, format="PNG")
         
         message = st.text_area("Enter Message:")
         password = st.text_input("Enter Password:")
@@ -125,16 +177,24 @@ def encrypt_page():
             # Provide a download link for the encrypted image
             st.markdown(f"**[Download Encrypted Image]({new_image_path})**")
 
-
 # Page to drag and drop an image path for decryption
 def decrypt_page():
     st.title("Image Decryption")
     st.write("Drag and drop an encrypted image file for decryption.")
     image_path = st.file_uploader("Upload Encrypted Image", type=["jpg", "jpeg", "png"])
+    
     if image_path:
         st.image(image_path, caption="Uploaded Encrypted Image", use_column_width=True)
-        # Add decryption logic here
-
+        
+        password = st.text_input("Enter Password:")
+        
+        if st.button("Decrypt"):
+            try:
+                decrypted_message = decrypt_image(image_path, password)
+                st.success("Decryption Successful")
+                st.text_area("Decrypted Message:", decrypted_message)
+            except Exception as e:
+                st.error(str(e))
 def main():
     st.title("Image Encryption and Decryption App")
 
