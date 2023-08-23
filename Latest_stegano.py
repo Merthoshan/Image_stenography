@@ -175,8 +175,8 @@ def Stego():
     print("2: Decode")
 
     func = input()
-    image_path ="C:\\Users\\Surface Pro\\Desktop\\manan\\dog.jpg"
-    image_path2 ="C:\\Users\\Surface Pro\\Desktop\\manan\\dog_enc.png"
+    image_path ="\\Users\\manavkumardubey\\Pictures\\Photos Library.photoslibrary\\resources\\derivatives\\6\\64421063-54C8-4930-8F1B-5AE6D48329EE_1_105_c.jpeg"
+    image_path2 ="\\Users\\manavkumardubey\\Pictures\\Photos Library.photoslibrary\\resources\\derivatives\\6\\64421063-54C8-4930-8F1B-5AE6D48329EE_1_105_c_enc.png"
 
     if func == '1': 
         print("Enter Source Image Path")
