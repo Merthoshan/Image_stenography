@@ -1,8 +1,6 @@
 from PIL import Image
 import numpy as np
 import os
-import tempfile
-
 
 def charToBin(text):
     # ascii 32 represents space so we replace space with 00100000 to avoid the error
