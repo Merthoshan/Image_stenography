@@ -168,14 +168,13 @@ def encrypt_page():
         
         message = st.text_area("Enter Message:")
         password = st.text_input("Enter Password:")
-
-        if st.button("Encrypt"):
-            # Perform encryption and get the new image path
-            new_image_path = encrypt_message(image_path, message, password)
-            st.success(f"Image is encoded and saved successfully as '{new_image_path}'")
-
-            # Provide a download link for the encrypted image
-            st.markdown(f"**[Download Encrypted Image]({new_image_path})**")
+        if message and password:
+                    if st.button("Encrypt"):
+                        new_image_path = encrypt_message(image_path, message, password)
+                        st.success(f"Image is encoded and saved successfully as '{new_image_path}'")
+                        st.markdown(f"**[Download Encrypted Image]({new_image_path})**")
+        else:
+            st.warning("Please provide both a message and a password.")
 
 # Page to drag and drop an image path for decryption
 def decrypt_page():
@@ -188,13 +187,16 @@ def decrypt_page():
         
         password = st.text_input("Enter Password:")
         
-        if st.button("Decrypt"):
-            try:
-                decrypted_message = decrypt_image(image_path, password)
-                st.success("Decryption Successful")
-                st.text_area("Decrypted Message:", decrypted_message)
-            except Exception as e:
-                st.error(str(e))
+        if password:
+            if st.button("Decrypt"):
+                try:
+                    decrypted_message = decrypt_image(image_path, password)
+                    st.success("Decryption Successful")
+                    st.text_area("Decrypted Message:", decrypted_message)
+                except Exception as e:
+                        st.error(str(e))
+        else:
+            st.warning("Please provide the password.")
 def main():
     st.title("Image Encryption and Decryption App")
 
