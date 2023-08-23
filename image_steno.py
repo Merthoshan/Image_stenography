@@ -158,12 +158,12 @@ def get_image_download_link(img_path, filename):
 def encrypt_page():
     st.title("Image Encryption")
     
-    default_image_path = "path_to_default_image.png"
+ 
     uploaded_image = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
     
     if uploaded_image is None:
-        st.image(default_image_path, caption="Default Image", use_column_width=True)
-        image_path = default_image_path
+        st.warning("Please uload an image")
+       
     else:
         image = Image.open(uploaded_image)
         st.image(image, caption="Uploaded Image", use_column_width=True)
@@ -180,6 +180,8 @@ def encrypt_page():
 
                 # Provide a download link for the encrypted image
                 st.markdown(get_image_download_link(new_image_path, "encrypted_image.png"), unsafe_allow_html=True)
+        else:
+            st.warning("Please provide both a message and a password.")
 
 
 # Page to drag and drop an image path for decryption
