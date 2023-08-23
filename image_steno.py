@@ -147,34 +147,40 @@ def decrypt_image(image_path, password):
     else:
         raise Exception("Password not found! Make sure you have uploaded the correct image")
 
+import base64
+
+def get_image_download_link(img_path, filename):
+    with open(img_path, "rb") as img_file:
+        encoded_img = base64.b64encode(img_file.read()).decode()
+    href = f'<a href="data:image/png;base64,{encoded_img}" download="{filename}">Click here to download</a>'
+    return href
+
 def encrypt_page():
     st.title("Image Encryption")
     
-    # Placeholder image path for when no image is uploaded
     default_image_path = "path_to_default_image.png"
-    
     uploaded_image = st.file_uploader("Upload Image", type=["jpg", "jpeg", "png"])
     
     if uploaded_image is None:
         st.image(default_image_path, caption="Default Image", use_column_width=True)
         image_path = default_image_path
     else:
-        # Convert the UploadedFile to bytes and create a PIL Image
         image = Image.open(uploaded_image)
         st.image(image, caption="Uploaded Image", use_column_width=True)
-        # Save the uploaded image locally for use in encryption
         image_path = "uploaded_image.png"
         image.save(image_path, format="PNG")
         
         message = st.text_area("Enter Message:")
         password = st.text_input("Enter Password:")
+        
         if message and password:
-                    if st.button("Encrypt"):
-                        new_image_path = encrypt_message(image_path, message, password)
-                        st.success(f"Image is encoded and saved successfully as '{new_image_path}'")
-                        st.markdown(f"**[Download Encrypted Image]({new_image_path})**")
-        else:
-            st.warning("Please provide both a message and a password.")
+            if st.button("Encrypt"):
+                new_image_path = encrypt_message(image_path, message, password)
+                st.success(f"Image is encoded and saved successfully as '{new_image_path}'")
+
+                # Provide a download link for the encrypted image
+                st.markdown(get_image_download_link(new_image_path, "encrypted_image.png"), unsafe_allow_html=True)
+
 
 # Page to drag and drop an image path for decryption
 def decrypt_page():
